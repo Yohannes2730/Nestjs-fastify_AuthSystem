@@ -1,3 +1,12 @@
+
+This project is a user authentication system built using NestJS with Fastify for high performance and scalability. The application uses MongoDB as its primary database for efficient and flexible data storage.
+
+The system implements a secure authentication flow with Email-based One-Time Password (OTP) verification, ensuring reliable user identity validation during registration and login processes.
+
+
+
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
