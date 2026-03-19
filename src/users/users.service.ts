@@ -69,4 +69,10 @@ export class UsersService {
       token,
     };
   }
+  async forgotPassword(email: string) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException('Email not found');
+    } 
+}
 }
