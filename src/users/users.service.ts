@@ -75,11 +75,5 @@ export class UsersService {
       throw new BadRequestException('Email not found');
     } 
 }
-async changePassword(userId: string, newPassword: string) {
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await this.userModel.findByIdAndUpdate(userId, { password: hashedPassword });
-    return {
-      message: 'Password changed successfully',
-    };
-  }
+
 }
