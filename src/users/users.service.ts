@@ -70,7 +70,8 @@ export class UsersService {
     };
   }
   async forgotPassword(email: string) {
-    const user = await this.userModel.findOne({ email });
+    const normalizedEmail = email.toLowerCase();
+    const user = await this.userModel.findOne({ email: normalizedEmail });
     if (!user) {
       throw new BadRequestException('Email not found');
     } 
