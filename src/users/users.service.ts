@@ -8,7 +8,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
 import { randomInt } from 'node:crypto';
-import { Logger } from '@nestjs/common';  
+import { Logger } from '@nestjs/common';
 @Injectable()
 export class UsersService {
   constructor(
@@ -85,8 +85,6 @@ export class UsersService {
       // await this.resetTokenModel.create(newToken);
     }
 catch (error) {     
-
-this.Logger.error('Error sending OTP email', error);
 throw new BadRequestException('Failed to send OTP email');
     }
   }
