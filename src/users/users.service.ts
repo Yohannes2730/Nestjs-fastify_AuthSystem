@@ -81,7 +81,7 @@ export class UsersService {
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
     const newToken = {userId: user._id, token: hashedOtp, expiresAt : otpExpiry, type: 'passwordReset'};
     try {
-      // await this.emailService.sendotp(normalizedEmail, otp);
+      await this.emailService.sendOtp(normalizedEmail, otp);
       // await this.resetTokenModel.create(newToken);
     }
 catch (error) {     
