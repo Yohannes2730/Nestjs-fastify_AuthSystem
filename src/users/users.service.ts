@@ -8,7 +8,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
 import { randomInt } from 'node:crypto';
-import { Logger } from '@nestjs/common';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -16,7 +16,6 @@ export class UsersService {
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
   ) {}
-
   async register(registerData: RegisterDto) {
     const { username, email, password } = registerData;
     const exists = await this.userModel.exists({ email });
@@ -31,7 +30,6 @@ export class UsersService {
       password: hashedPassword,
       isVerified: false,
     });
-
     await newUser.save();
 
     const token = this.jwtService.sign(
@@ -43,7 +41,6 @@ export class UsersService {
       message: 'Registration successful',
     };
   }
-
   async login(loginData: LoginDto) {
     const { email, password } = loginData;
 
@@ -52,7 +49,6 @@ export class UsersService {
     if (!user) {
       throw new BadRequestException('Invalid credentials');
     }
-
     if (!user.isVerified) {
       throw new BadRequestException('Email not verified');
     }
@@ -64,7 +60,6 @@ export class UsersService {
     const token = this.jwtService.sign(
       { sub: user._id.toString() }, 
     );
-
     return {
       message: 'Login successful',
       token,
@@ -81,11 +76,12 @@ export class UsersService {
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
     const newToken = {userId: user._id, token: hashedOtp, expiresAt : otpExpiry, type: 'passwordReset'};
     try {
-      await this.emailService.sendOtp(normalizedEmail, otp);
+      await this.emailService.sendOtp(normalizedEmail);
       // await this.resetTokenModel.create(newToken);
     }
 catch (error) {     
 throw new BadRequestException('Failed to send OTP email');
+
     }
   }
 }
