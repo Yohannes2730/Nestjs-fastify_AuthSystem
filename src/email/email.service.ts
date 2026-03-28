@@ -44,6 +44,7 @@ export class EmailService {
     return { message: 'OTP sent to your email' };
   
   }
+  //verify otp here
   async verifyOtp(email: string, otp: string) {
     if (!email) throw new BadRequestException('Email is required');
 
