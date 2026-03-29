@@ -8,7 +8,8 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
 import { randomInt } from 'node:crypto';
-
+import { ForgetPasswordDto } from './dto/forgetPassword';
+import { ResetPasswordDto } from './dto/resetPassword';
 @Injectable()
 export class UsersService {
   constructor(
@@ -67,26 +68,48 @@ export class UsersService {
       token,
     };
   }
-  async forgotPassword(email: string) {
-    const normalizedEmail = email.toLowerCase();
-    const user = await this.userModel.findOne({ email: normalizedEmail });
-    if (!user) {
-      throw new BadRequestException('Email not found');
-    }
-    const otp = randomInt(100000, 900000).toString();
-    const hashedOtp = await bcrypt.hash(otp, 10);
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-    const newToken = {
-      userId: user._id,
-      token: hashedOtp,
-      expiresAt: otpExpiry,
-      type: 'passwordReset',
-    };
-    try {
-      await this.emailService.sendOtp(normalizedEmail);
-      // await this.resetTokenModel.create(newToken);
-    } catch (error) {
-      throw new BadRequestException('Failed to send OTP email');
-    }
+  async forgotPassword(forgotPass : ForgetPasswordDto) {
+  const normalizedEmail = forgotPass.email.trim().toLowerCase();
+  const user = await this.userModel.findOne({ email: normalizedEmail });
+
+  if (!user) {
+    throw new BadRequestException('Email not found');
   }
+  const otp = randomInt(100000, 999999).toString();
+  const hashedOtp = await bcrypt.hash(otp, 10);
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+  await this.resetTokenModel.create({
+    userId: user._id,
+    token: hashedOtp,
+    expiresAt: otpExpiry,
+    type: 'passwordReset',
+  });
+
+  await this.emailService.sendOtp(normalizedEmail, otp);
+
+  return { message: 'OTP sent to email' };
 }
+  async resetPassword( data: ResetPasswordDto) {
+  const { email, otp, newPassword } = data;
+
+  const user = await this.userModel.findOne({ email });
+  if (!user) throw new BadRequestException('Email not found');
+
+  const otpRecord = await this.resetTokenModel.findOne({ userId: user._id, type: 'passwordReset' });
+  if (!otpRecord) throw new BadRequestException('Invalid OTP');
+  
+  const isValidOtp = await bcrypt.compare(otp, otpRecord.token);
+
+  if (!isValidOtp) throw new BadRequestException('Invalid OTP');
+  if (otpRecord.expiresAt < new Date()) throw new BadRequestException('OTP expired');
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
+
+  await this.resetTokenModel.deleteOne({ _id: otpRecord._id });
+
+  return { message: 'Password reset successful' };
+}
+}
+

@@ -3,6 +3,8 @@ import { UsersService } from './users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgetPasswordDto } from './dto/forgetPassword';
+import { ResetPasswordDto } from './dto/resetPassword'; 
+
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -37,5 +39,13 @@ async forgotPassword(@Body() forgotPass : ForgetPasswordDto) {
       error.message,
     );
   }
+}
+@Post('password/reset')
+async resetPassword(@Body() data: ResetPasswordDto) {
+  try {    return await this.usersService.resetPassword(data);
+  } catch (error) {   
+     throw new BadRequestException('Failed to reset password', error.message);
+  }
+
 }
 }
