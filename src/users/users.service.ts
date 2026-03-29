@@ -16,11 +16,12 @@ export class UsersService {
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
   ) {}
+
   async register(registerData: RegisterDto) {
     const { username, email, password } = registerData;
-    const exists = await this.userModel.exists({ email });
-    if (exists) {
-      throw new BadRequestException('Email already in use');
+    const userExist = await this.userModel.findOne({ email });
+    if (userExist) {
+      throw new BadRequestException(' this Email already found');
     }
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -44,20 +45,23 @@ export class UsersService {
   async login(loginData: LoginDto) {
     const { email, password } = loginData;
 
-    const user = await this.userModel.findOne({ email }).select('+password');
+    const normalizedEmail = email.trim().toLowerCase();
 
-    if (!user) {
-      throw new BadRequestException('Invalid credentials');
+    const user = await this.userModel
+      .findOne({ email: normalizedEmail })
+      .select('+password');
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new BadRequestException('Invalid email or password');
     }
     if (!user.isVerified) {
-      throw new BadRequestException('Email not verified');
+      throw new BadRequestException('Please verify your email');
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const token = this.jwtService.sign({
+      sub: user._id.toString(),
+      email: user.email,
+    });
 
-    if (!isPasswordValid) {
-      throw new BadRequestException('Invalid credentials');
-    }
-    const token = this.jwtService.sign({ sub: user._id.toString() });
     return {
       message: 'Login successful',
       token,

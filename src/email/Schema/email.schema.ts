@@ -11,7 +11,7 @@ export class EmailOtp {
 
   @Prop({ required: true })
   expiresAt: Date;
-
+  
   @Prop({ default: false })
   verified: boolean;
 

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, BadRequestException } from '
 import { UsersService } from './users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-
+import { ForgetPasswordDto } from './dto/forgetPassword';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -26,5 +26,16 @@ export class UsersController {
       throw new BadRequestException('Login failed', error.message);
     }
   
+}
+@Post('password/forgot')
+async forgotPassword(@Body() forgotPass : ForgetPasswordDto) {
+  try {
+    return await this.usersService.forgotPassword(forgotPass.email);
+  } catch (error) {
+    throw new BadRequestException(
+      'Failed to initiate password reset',
+      error.message,
+    );
+  }
 }
 }
