@@ -33,7 +33,7 @@ export class UsersService {
     await newUser.save();
 
     const token = this.jwtService.sign(
-      { sub: newUser._id.toString() }, 
+      { sub: newUser._id.toString() },
       { expiresIn: '1d' },
     );
 
@@ -57,9 +57,7 @@ export class UsersService {
     if (!isPasswordValid) {
       throw new BadRequestException('Invalid credentials');
     }
-    const token = this.jwtService.sign(
-      { sub: user._id.toString() }, 
-    );
+    const token = this.jwtService.sign({ sub: user._id.toString() });
     return {
       message: 'Login successful',
       token,
@@ -70,18 +68,21 @@ export class UsersService {
     const user = await this.userModel.findOne({ email: normalizedEmail });
     if (!user) {
       throw new BadRequestException('Email not found');
-    } 
-    const otp = randomInt(100000,900000).toString();
+    }
+    const otp = randomInt(100000, 900000).toString();
     const hashedOtp = await bcrypt.hash(otp, 10);
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-    const newToken = {userId: user._id, token: hashedOtp, expiresAt : otpExpiry, type: 'passwordReset'};
+    const newToken = {
+      userId: user._id,
+      token: hashedOtp,
+      expiresAt: otpExpiry,
+      type: 'passwordReset',
+    };
     try {
       await this.emailService.sendOtp(normalizedEmail);
       // await this.resetTokenModel.create(newToken);
-    }
-catch (error) {     
-throw new BadRequestException('Failed to send OTP email');
-
+    } catch (error) {
+      throw new BadRequestException('Failed to send OTP email');
     }
   }
 }
