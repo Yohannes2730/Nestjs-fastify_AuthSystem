@@ -10,7 +10,7 @@ import * as bcrypt from 'bcryptjs';
 import { randomInt } from 'node:crypto';
 import { ForgetPasswordDto } from './dto/forgetPassword';
 import { ResetPasswordDto } from './dto/resetPassword';
-import { ResetToken, ResetTokenDocument } from './dto/resetToken';
+import { ResetToken, ResetTokenDocument } from './Schema/resetToken';
 @Injectable()
 export class UsersService {
   constructor(

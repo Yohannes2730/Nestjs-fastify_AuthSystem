@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Users, userSchema } from 'src/users/Schema/user.schema';
 import { MongooseModule } from '@nestjs/mongoose/dist/mongoose.module';
 import { EmailOtp, EmailOtpSchema } from './Schema/email.schema';
+
 @Module({
   imports: [
     ConfigModule,
@@ -31,5 +32,6 @@ import { EmailOtp, EmailOtpSchema } from './Schema/email.schema';
   ],
   controllers: [EmailController],
   providers: [EmailService],
+  exports: [EmailService], 
 })
 export class EmailModule {}
