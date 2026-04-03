@@ -9,7 +9,6 @@ export class Users extends Document {
   email: string;
   @Prop({ required: true })
   password: string;
-  @Prop()
   @Prop({ default: false })
   isVerified: boolean;
   @Prop({ default: Date.now() })

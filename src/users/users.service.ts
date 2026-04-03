@@ -10,10 +10,12 @@ import * as bcrypt from 'bcryptjs';
 import { randomInt } from 'node:crypto';
 import { ForgetPasswordDto } from './dto/forgetPassword';
 import { ResetPasswordDto } from './dto/resetPassword';
+import { ResetToken, ResetTokenDocument } from './dto/resetToken';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(Users.name) private readonly userModel: Model<Users>,
+    @InjectModel(ResetToken.name) private readonly resetTokenModel: Model<ResetTokenDocument>,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
   ) {}
