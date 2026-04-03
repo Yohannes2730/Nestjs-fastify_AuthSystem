@@ -32,7 +32,7 @@ export class UsersController {
 @Post('password/forgot')
 async forgotPassword(@Body() forgotPass : ForgetPasswordDto) {
   try {
-    return await this.usersService.forgotPassword(forgotPass.email);
+    return await this.usersService.forgotPassword(forgotPass);
   } catch (error) {
     throw new BadRequestException(
       'Failed to initiate password reset',

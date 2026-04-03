@@ -82,13 +82,14 @@ export class UsersService {
   const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
   await this.resetTokenModel.create({
-    userId: user._id,
+
+    userId: user._id.toString()   ,
     token: hashedOtp,
     expiresAt: otpExpiry,
     type: 'passwordReset',
   });
 
-  await this.emailService.sendOtp(normalizedEmail, otp);
+  await this.emailService.sendOtp(normalizedEmail);
 
   return { message: 'OTP sent to email' };
 }
@@ -98,7 +99,7 @@ export class UsersService {
   const user = await this.userModel.findOne({ email });
   if (!user) throw new BadRequestException('Email not found');
 
-  const otpRecord = await this.resetTokenModel.findOne({ userId: user._id, type: 'passwordReset' });
+  const otpRecord = await this.resetTokenModel.findOne({ userId: user._id.toString(), type: 'passwordReset' });
   if (!otpRecord) throw new BadRequestException('Invalid OTP');
   
   const isValidOtp = await bcrypt.compare(otp, otpRecord.token);
