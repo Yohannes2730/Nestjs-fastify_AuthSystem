@@ -7,8 +7,7 @@ export class EmailOtp {
   email: string;
 
   @Prop({ required: true })
-  otpHash: string;
-
+  otp: string;
   @Prop({ required: true })
   expiresAt: Date;
   @Prop({ default: false })

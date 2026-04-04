@@ -28,7 +28,7 @@ export class EmailService {
 
     await this.otpModel.create({
       email,
-      otpHash,
+      otp : otpHash,
       expiresAt,
       verified: false,
       resendCount: 0,
@@ -56,7 +56,7 @@ export class EmailService {
     if (!record) throw new BadRequestException('OTP not found');
     if (record.expiresAt < new Date()) throw new BadRequestException('OTP expired');
 
-    const isValid = await bcrypt.compare(otp, record.otpHash);
+    const isValid = await bcrypt.compare(otp, record.otp);
     if (!isValid) throw new BadRequestException('Invalid OTP');
 
     record.verified = true;

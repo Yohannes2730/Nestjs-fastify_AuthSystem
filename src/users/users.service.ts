@@ -21,30 +21,37 @@ export class UsersService {
   ) {}
 
   async register(registerData: RegisterDto) {
-    const { username, email, password } = registerData;
-    const userExist = await this.userModel.findOne({ email });
-    if (userExist) {
-      throw new BadRequestException(' this Email already found');
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new this.userModel({
-      username,
-      email,
-      password: hashedPassword,
-      isVerified: false,
-    });
-    await newUser.save();
-
-    const token = this.jwtService.sign(
-      { sub: newUser._id.toString() },
-      { expiresIn: '1d' },
-    );
-
-    return {
-      message: 'Registration successful',
-    };
+  const { username, email, password } = registerData;
+  const userExist = await this.userModel.findOne({ email });
+  if (userExist) {
+    throw new BadRequestException('Email already exists');
   }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = new this.userModel({
+    username,
+    email,
+    password: hashedPassword,
+    isVerified: false,
+  });
+  await newUser.save();
+
+  const otp = randomInt(100000, 999999).toString();
+  const hashedOtp = await bcrypt.hash(otp, 10);
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); 
+
+  await this.resetTokenModel.create({
+    userId: newUser._id.toString(),
+    token: hashedOtp,
+    expiresAt: otpExpiry,
+    type: 'emailVerification', 
+  });
+
+  await this.emailService.sendOtp(email);
+
+  return {
+    message: 'Registration successful. OTP sent to email.',
+  };
+}
   async login(loginData: LoginDto) {
     const { email, password } = loginData;
 
