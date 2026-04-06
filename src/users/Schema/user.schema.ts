@@ -1,19 +1,26 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+export type UserDocument = Users & Document;
+
 @Schema()
-export class Users extends Document {
+export class Users {
   @Prop({ required: true, unique: true })
   username: string;
+
   @Prop({ required: true, unique: true })
   email: string;
+
   @Prop({ required: true })
   password: string;
+
   @Prop({ default: false })
   isVerified: boolean;
+
   @Prop({ default: 0 })
   loginAttempts: number;
-  @Prop({ type: Date, default: null }) 
+
+  @Prop({ type: Date, default: null })
   blockedUntil: Date | null;
 
   @Prop({ default: Date.now })
