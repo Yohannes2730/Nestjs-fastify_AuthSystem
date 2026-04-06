@@ -19,39 +19,35 @@ export class UsersService {
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
   ) {}
-
+//here is the register function
   async register(registerData: RegisterDto) {
   const { username, email, password } = registerData;
-  const userExist = await this.userModel.findOne({ email });
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const userExist = await this.userModel.findOne({ email: normalizedEmail });
   if (userExist) {
     throw new BadRequestException('Email already exists');
   }
   const hashedPassword = await bcrypt.hash(password, 10);
+
   const newUser = new this.userModel({
     username,
-    email,
+    email: normalizedEmail,
     password: hashedPassword,
     isVerified: false,
   });
+
   await newUser.save();
 
-  const otp = randomInt(100000, 999999).toString();
-  const hashedOtp = await bcrypt.hash(otp, 10);
-  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); 
-
-  await this.resetTokenModel.create({
-    userId: newUser._id.toString(),
-    token: hashedOtp,
-    expiresAt: otpExpiry,
-    type: 'emailVerification', 
-  });
-
-  await this.emailService.sendOtp(email);
+  await this.emailService.sendOtp(normalizedEmail);
 
   return {
     message: 'Registration successful. OTP sent to email.',
   };
 }
+
+//here is the login function
   async login(loginData: LoginDto) {
     const { email, password } = loginData;
 
@@ -76,50 +72,39 @@ export class UsersService {
       message: 'Login successful',
       token,
     };
-  }
-  async forgotPassword(forgotPass : ForgetPasswordDto) {
+  
+}
+  //here is the forgot password function
+ async forgotPassword(forgotPass: ForgetPasswordDto) {
   const normalizedEmail = forgotPass.email.trim().toLowerCase();
-  const user = await this.userModel.findOne({ email: normalizedEmail });
 
+  const user = await this.userModel.findOne({ email: normalizedEmail });
   if (!user) {
     throw new BadRequestException('Email not found');
   }
-  const otp = randomInt(100000, 999999).toString();
-  const hashedOtp = await bcrypt.hash(otp, 10);
-  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-
-  await this.resetTokenModel.create({
-
-    userId: user._id.toString()   ,
-    token: hashedOtp,
-    expiresAt: otpExpiry,
-    type: 'passwordReset',
-  });
 
   await this.emailService.sendOtp(normalizedEmail);
 
   return { message: 'OTP sent to email' };
 }
-  async resetPassword( data: ResetPasswordDto) {
-  const { email, otp, newPassword } = data;
+//here is the reset password function
+  async resetPassword(data: ResetPasswordDto) {
+  const { email, otp, newPassword, confirmPassword } = data;
 
-  const user = await this.userModel.findOne({ email });
-  if (!user) throw new BadRequestException('Email not found');
+  const normalizedEmail = email.trim().toLowerCase();
 
-  const otpRecord = await this.resetTokenModel.findOne({ userId: user._id.toString(), type: 'passwordReset' });
-  if (!otpRecord) throw new BadRequestException('Invalid OTP');
-  
-  const isValidOtp = await bcrypt.compare(otp, otpRecord.token);
+  if (newPassword !== confirmPassword) {
+    throw new BadRequestException('Passwords do not match');
+  }
 
-  if (!isValidOtp) throw new BadRequestException('Invalid OTP');
-  if (otpRecord.expiresAt < new Date()) throw new BadRequestException('OTP expired');
+  await this.emailService.verifyOtp(normalizedEmail, otp);
+
+  const user = await this.userModel.findOne({ email: normalizedEmail });
+  if (!user) throw new BadRequestException('User not found');
 
   user.password = await bcrypt.hash(newPassword, 10);
   await user.save();
 
-  await this.resetTokenModel.deleteOne({ _id: otpRecord._id });
-
   return { message: 'Password reset successful' };
 }
 }
-

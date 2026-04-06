@@ -10,7 +10,6 @@ export class ResetPasswordDto {
   @IsNotEmpty()
   resetToken: string;
   @IsString()
-  @IsNotEmpty()
   @MinLength(8)
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/,
@@ -19,5 +18,9 @@ export class ResetPasswordDto {
         'Password must include uppercase, lowercase, number, and special character',
     },
   )
+  @IsString()
   newPassword: string;
+  @IsString()
+  confirmPassword: string;
+
 }
