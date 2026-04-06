@@ -8,13 +8,13 @@ import {
 
 export class ResetPasswordDto {
   @IsEmail()
-  email: string;
+  email?: string;
   @IsString()
   @IsNotEmpty()
-  otp: string;
+  otp?: string;
   @IsString()
   @IsNotEmpty()
-  resetToken: string;
+  resetToken?: string;
   @IsString()
   @MinLength(8)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/, {
@@ -22,7 +22,7 @@ export class ResetPasswordDto {
       'Password must include uppercase, lowercase, number, and special character',
   })
   @IsString()
-  newPassword: string;
+  newPassword?: string;
   @IsString()
-  confirmPassword: string;
+  confirmPassword?: string;
 }

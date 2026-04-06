@@ -21,12 +21,12 @@ export class UsersService {
   // Registration with OTP
   async register(registerData: RegisterDto) {
     const { username, email, password } = registerData;
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail  = email?.trim().toLowerCase();
 
     const userExist = await this.userModel.findOne({ email: normalizedEmail });
     if (userExist) throw new BadRequestException('Email already exists');
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password?.toString() || '', 10);
     const newUser = new this.userModel({
       username,
       email: normalizedEmail,
@@ -46,7 +46,7 @@ export class UsersService {
   // Login with attempt limitation
   async login(loginData: LoginDto) {
     const { email, password } = loginData;
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = email?.trim().toLowerCase();
 
     const user = await this.userModel
       .findOne({ email: normalizedEmail })
@@ -56,10 +56,10 @@ export class UsersService {
 
     if (user.blockedUntil && user.blockedUntil > new Date()) {
       const remainingHours = Math.ceil(
-        (user.blockedUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60),
+        (user.blockedUntil.getTime() - Date.now()) / (1000 * 60 * 60),
       );
       throw new BadRequestException(
-        `Account is blocked due to multiple failed login attempts. Try again in ${remainingHours} hour(s)`,
+        `Account blocked. Try again in ${remainingHours} hour(s)`,
       );
     }
 
@@ -94,7 +94,7 @@ export class UsersService {
 
   // Forgot password
   async forgotPassword(forgotPass: ForgetPasswordDto) {
-    const normalizedEmail = forgotPass.email.trim().toLowerCase();
+    const normalizedEmail = forgotPass.email?.trim().toLowerCase();
     const user = await this.userModel.findOne({ email: normalizedEmail });
 
     if (!user) throw new BadRequestException('Email not found');
@@ -106,7 +106,7 @@ export class UsersService {
   // Reset password
   async resetPassword(data: ResetPasswordDto) {
     const { email, otp, newPassword, confirmPassword } = data;
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = email?.trim().toLowerCase();
 
     if (newPassword !== confirmPassword)
       throw new BadRequestException('Passwords do not match');
@@ -116,7 +116,7 @@ export class UsersService {
     const user = await this.userModel.findOne({ email: normalizedEmail });
     if (!user) throw new BadRequestException('User not found');
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = await bcrypt.hash(newPassword?.toString() || '', 10);
     await user.save();
 
     return { message: 'Password reset successful' };

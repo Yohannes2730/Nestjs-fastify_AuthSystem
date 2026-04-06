@@ -39,7 +39,7 @@ export class EmailService {
 
     await this.mailerService.sendMail({
       to: email,
-      from: `"Your App Name" <${process.env.MAIL_USER}>`,
+      from: `"joye love" <${process.env.MAIL_USER}>`,
       subject: 'Your OTP Code',
       text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
       html: `<p>Your OTP code is <b>${otp}</b>. It will expire in 5 minutes.</p>`,
