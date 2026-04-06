@@ -3,7 +3,6 @@ import { IsEmail,IsStrongPassword,IsString,Matches, MinLength } from "class-vali
 export class LoginDto {
     @IsEmail()
     email: string;  
-    @IsStrongPassword()
     @MinLength(8)
     @IsString()
     @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {

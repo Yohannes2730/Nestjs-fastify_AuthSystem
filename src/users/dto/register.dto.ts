@@ -12,7 +12,6 @@ export class RegisterDto {
   @IsEmail()
   email: string;
   @IsString()
-  @IsStrongPassword()
   @MinLength(8)
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
