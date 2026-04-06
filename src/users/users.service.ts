@@ -21,7 +21,7 @@ export class UsersService {
   // Registration with OTP
   async register(registerData: RegisterDto) {
     const { username, email, password } = registerData;
-    const normalizedEmail  = email?.trim().toLowerCase();
+    const normalizedEmail  = email.trim().toLowerCase();
 
     const userExist = await this.userModel.findOne({ email: normalizedEmail });
     if (userExist) throw new BadRequestException('Email already exists');
@@ -63,7 +63,7 @@ export class UsersService {
       );
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password?.toString() || '', user.password?.toString() || '');
     if (!isPasswordValid) {
       user.loginAttempts = (user.loginAttempts || 0) + 1;
 
@@ -94,7 +94,7 @@ export class UsersService {
 
   // Forgot password
   async forgotPassword(forgotPass: ForgetPasswordDto) {
-    const normalizedEmail = forgotPass.email?.trim().toLowerCase();
+    const normalizedEmail = forgotPass.email.trim().toLowerCase();
     const user = await this.userModel.findOne({ email: normalizedEmail });
 
     if (!user) throw new BadRequestException('Email not found');
@@ -106,12 +106,12 @@ export class UsersService {
   // Reset password
   async resetPassword(data: ResetPasswordDto) {
     const { email, otp, newPassword, confirmPassword } = data;
-    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
     if (newPassword !== confirmPassword)
       throw new BadRequestException('Passwords do not match');
 
-    await this.emailService.verifyOtp(normalizedEmail, otp);
+    await this.emailService.verifyOtp(normalizedEmail, otp?.toString() || '');
 
     const user = await this.userModel.findOne({ email: normalizedEmail });
     if (!user) throw new BadRequestException('User not found');
