@@ -11,7 +11,12 @@ export class Users extends Document {
   password: string;
   @Prop({ default: false })
   isVerified: boolean;
-  @Prop({ default: Date.now() })
+  @Prop({ default: 0 })
+  loginAttempts: number;
+  @Prop({ type: Date, default: null }) 
+  blockedUntil: Date | null;
+
+  @Prop({ default: Date.now })
   createdAt: Date;
 }
 
