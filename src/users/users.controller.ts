@@ -23,7 +23,8 @@ export class UsersController {
     try {
       return await this.usersService.register(registerData);
     } catch (error) {
-      throw new BadRequestException('Registration failed');
+      console.log(error);
+      throw error;
     }
   }
   @Post('verify-otp')
@@ -58,9 +59,8 @@ export class UsersController {
     try {
       return await this.usersService.forgotPassword(forgotPass);
     } catch (error) {
-      throw new BadRequestException(
-        'Failed to initiate password reset'
-      );
+      console.log(error);
+      throw error;
     }
   }
   @Post('password/reset')
@@ -68,7 +68,8 @@ export class UsersController {
     try {
       return await this.usersService.resetPassword(data);
     } catch (error) {
-      throw new BadRequestException('Failed to reset password');
+      console.log(error);
+      throw error;
     }
   }
 }
