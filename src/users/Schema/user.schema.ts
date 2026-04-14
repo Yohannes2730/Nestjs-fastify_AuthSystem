@@ -6,25 +6,25 @@ export type UserDocument = Users & Document;
 @Schema()
 export class Users {
   @Prop({ required: true, unique: true })
-  username?: string;
+  username: string;
 
   @Prop({ required: true, unique: true })
-  email?: string;
+  email: string;
 
   @Prop({ required: true })
-  password?: string;
+  password: string;
 
   @Prop({ default: false })
-  isVerified?: boolean;
+  isVerified: boolean;
 
   @Prop({ default: 0 })
-  loginAttempts?: number;
+  loginAttempts: number;
 
   @Prop({ type: Date, default: null })
-  blockedUntil?: Date | null;
+  blockedUntil: Date | null;
 
   @Prop({ default: Date.now })
-  createdAt?: Date;
+  createdAt: Date;
 }
 
 export const userSchema = SchemaFactory.createForClass(Users);

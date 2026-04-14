@@ -8,9 +8,9 @@ import {
 
 export class RegisterDto {
   @IsString()
-  username?: string;
+  username: string;
   @IsEmail()
-  email?: string;
+  email: string;
   @IsString()
   @MinLength(8)
   @Matches(
@@ -20,5 +20,5 @@ export class RegisterDto {
         'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
     },
   )
-  password?: string;
+  password: string;
 }
