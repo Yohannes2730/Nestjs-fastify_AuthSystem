@@ -26,7 +26,7 @@ export class EmailService {
     const otp = this.generateOtp();
     const otpHash = await bcrypt.hash(otp, 10);
 
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
 
     await this.otpModel.create({
       email,

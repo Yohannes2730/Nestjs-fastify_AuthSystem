@@ -26,7 +26,7 @@ export class UsersService {
     const userExist = await this.userModel.findOne({ email: normalizedEmail });
     if (userExist) throw new BadRequestException('Email already exists');
 
-    const hashedPassword = await bcrypt.hash(password?.toString() || '', 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new this.userModel({
       username,
       email: normalizedEmail,
@@ -46,7 +46,7 @@ export class UsersService {
   // Login with attempt limitation
   async login(loginData: LoginDto) {
     const { email, password } = loginData;
-    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
     const user = await this.userModel
       .findOne({ email: normalizedEmail })
@@ -63,7 +63,7 @@ export class UsersService {
       );
     }
 
-    const isPasswordValid = await bcrypt.compare(password?.toString() || '', user.password?.toString() || '');
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       user.loginAttempts = (user.loginAttempts || 0) + 1;
 
@@ -111,12 +111,12 @@ export class UsersService {
     if (newPassword !== confirmPassword)
       throw new BadRequestException('Passwords do not match');
 
-    await this.emailService.verifyOtp(normalizedEmail, otp?.toString() || '');
+    await this.emailService.verifyOtp(normalizedEmail, otp);
 
     const user = await this.userModel.findOne({ email: normalizedEmail });
     if (!user) throw new BadRequestException('User not found');
 
-    user.password = await bcrypt.hash(newPassword?.toString() || '', 10);
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
     return { message: 'Password reset successful' };

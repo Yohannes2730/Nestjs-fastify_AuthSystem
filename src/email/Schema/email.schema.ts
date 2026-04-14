@@ -4,21 +4,21 @@ import { Prop, SchemaFactory } from '@nestjs/mongoose';
 @Schema()
 export class EmailOtp {
   @Prop({ required: true })
-  email?: string;
+  email: string;
   @Prop({ required: true })
-  otp?: string;
+  otp: string;
   @Prop({ required: true })
-  expiresAt?: Date;
+  expiresAt: Date;
   @Prop({ default: false })
-  verified?: boolean;
+  verified: boolean;
 
   @Prop({ default: 0 })
-  resendCount?: number;
+  resendCount: number;
 
   @Prop({ default: 0 })
-  attemptCount?: number;
+  attemptCount: number;
 
   @Prop()
-  lastResendAt?: Date;
+  lastResendAt: Date;
 }
 export const EmailOtpSchema = SchemaFactory.createForClass(EmailOtp);
