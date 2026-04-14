@@ -49,7 +49,8 @@ export class UsersController {
     try { 
       return await this.usersService.login(loginData);
     } catch (error) {
-      throw new BadRequestException('Login failed');
+      console.log(error);
+      throw error;
     }
   }
   @Post('password/forgot')

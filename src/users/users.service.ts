@@ -45,53 +45,55 @@ export class UsersService {
 
   // Login with attempt limitation
   async login(loginData: LoginDto) {
-    const { email, password } = loginData;
-    const normalizedEmail = email.trim().toLowerCase();
+  const { email, password } = loginData;
+  const normalizedEmail = email.trim().toLowerCase();
 
-    const user = await this.userModel
-      .findOne({ email: normalizedEmail })
-      .select('+password +loginAttempts +blockedUntil');
+  const user = await this.userModel
+    .findOne({ email: normalizedEmail })
+    .select('+password +loginAttempts +blockedUntil');
 
-    if (!user) throw new BadRequestException('Invalid email or password');
+  if (!user || !user.password) {
+    throw new BadRequestException('Invalid email or password');
+  }
+  if (user.blockedUntil && user.blockedUntil > new Date()) {
+    const remainingHours = Math.ceil(
+      (user.blockedUntil.getTime() - Date.now()) / (1000 * 60 * 60),
+    );
 
-    if (user.blockedUntil && user.blockedUntil > new Date()) {
-      const remainingHours = Math.ceil(
-        (user.blockedUntil.getTime() - Date.now()) / (1000 * 60 * 60),
-      );
-      throw new BadRequestException(
-        `Account blocked. Try again in ${remainingHours} hour(s)`,
-      );
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      user.loginAttempts = (user.loginAttempts || 0) + 1;
-
-      if (user.loginAttempts >= 3) {
-        user.blockedUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        user.loginAttempts = 0;
-      }
-
-      await user.save();
-      throw new BadRequestException('Invalid email or password');
-    }
-
-    user.loginAttempts = 0;
-    user.blockedUntil = null;
-    await user.save();
-
-    if (!user.isVerified) {
-      throw new BadRequestException('Please verify your email');
-    }
-
-    const token = this.jwtService.sign({
-      sub: user._id.toString(),
-      email: user.email,
-    });
-
-    return { message: 'Login successful', token };
+    throw new BadRequestException(
+      `Account blocked. Try again in ${remainingHours} hour(s)`,
+    );
   }
 
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    user.loginAttempts = (user.loginAttempts || 0) + 1;
+
+    if (user.loginAttempts >= 3) {
+      user.blockedUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      user.loginAttempts = 0;
+    }
+
+    await user.save();
+    throw new BadRequestException('Invalid email or password');
+  }
+
+  user.loginAttempts = 0;
+  user.blockedUntil = null;
+  await user.save();
+
+  if (!user.isVerified) {
+    throw new BadRequestException('Please verify your email');
+  }
+
+  const token = this.jwtService.sign({
+    sub: user._id.toString(),
+    email: user.email,
+  });
+
+  return { message: 'Login successful', token };
+}
   // Forgot password
   async forgotPassword(forgotPass: ForgetPasswordDto) {
     const normalizedEmail = forgotPass.email.trim().toLowerCase();
