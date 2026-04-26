@@ -21,10 +21,13 @@ export class UsersService {
   // Registration with OTP
   async register(registerData: RegisterDto) {
     const { username, email, password } = registerData;
-    const normalizedEmail  = email.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
     const userExist = await this.userModel.findOne({ email: normalizedEmail });
     if (userExist) throw new BadRequestException('Email already exists');
+
+    const user = await this.userModel.findOne({ username });
+    if (user) throw new BadRequestException('this username already exit');
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new this.userModel({
@@ -35,65 +38,61 @@ export class UsersService {
       loginAttempts: 0,
       blockedUntil: null,
     });
-
     await newUser.save();
 
     await this.emailService.sendOtp(normalizedEmail);
 
     return { message: 'Registration successful. OTP sent to email.' };
   }
-
   // Login with attempt limitation
   async login(loginData: LoginDto) {
-  const { email, password } = loginData;
-  const normalizedEmail = email.trim().toLowerCase();
+    const { email, password } = loginData;
+    const normalizedEmail = email.trim().toLowerCase();
 
-  const user = await this.userModel
-    .findOne({ email: normalizedEmail })
-    .select('+password +loginAttempts +blockedUntil');
+    const user = await this.userModel
+      .findOne({ email: normalizedEmail })
+      .select('+password +loginAttempts +blockedUntil');
 
-  if (!user || !user.password) {
-    throw new BadRequestException('Invalid email or password');
-  }
-  if (user.blockedUntil && user.blockedUntil > new Date()) {
-    const remainingHours = Math.ceil(
-      (user.blockedUntil.getTime() - Date.now()) / (1000 * 60 * 60),
-    );
+    if (!user || !user.password) {
+      throw new BadRequestException('Invalid email or password');
+    }
+    if (user.blockedUntil && user.blockedUntil > new Date()) {
+      const remainingHours = Math.ceil(
+        (user.blockedUntil.getTime() - Date.now()) / (1000 * 60 * 60),
+      );
 
-    throw new BadRequestException(
-      `Account blocked. Try again in ${remainingHours} hour(s)`,
-    );
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-
-  if (!isPasswordValid) {
-    user.loginAttempts = (user.loginAttempts || 0) + 1;
-
-    if (user.loginAttempts >= 3) {
-      user.blockedUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      user.loginAttempts = 0;
+      throw new BadRequestException(
+        `Account blocked. Try again in ${remainingHours} hour(s)`,
+      );
     }
 
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      user.loginAttempts = (user.loginAttempts || 0) + 1;
+
+      if (user.loginAttempts >= 3) {
+        user.blockedUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        user.loginAttempts = 0;
+      }
+
+      throw new BadRequestException('Invalid email or password');
+    }
+    user.loginAttempts = 0;
+    user.blockedUntil = null;
+
+    if (!user.isVerified) {
+      throw new BadRequestException('Please verify your email');
+    }
+
+    const token = this.jwtService.sign({
+      sub: user._id.toString(),
+      email: user.email,
+    });
     await user.save();
-    throw new BadRequestException('Invalid email or password');
+
+    return { message: 'Login successful', token };
   }
-
-  user.loginAttempts = 0;
-  user.blockedUntil = null;
-  await user.save();
-
-  if (!user.isVerified) {
-    throw new BadRequestException('Please verify your email');
-  }
-
-  const token = this.jwtService.sign({
-    sub: user._id.toString(),
-    email: user.email,
-  });
-
-  return { message: 'Login successful', token };
-}
   // Forgot password
   async forgotPassword(forgotPass: ForgetPasswordDto) {
     const normalizedEmail = forgotPass.email.trim().toLowerCase();
