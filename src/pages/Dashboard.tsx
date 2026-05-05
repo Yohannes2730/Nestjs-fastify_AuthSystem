@@ -21,7 +21,7 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div className="animate-fade-in">
-          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {name.split(" ")[0]} 👋</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {name.split(" ")[0]} </h1>
           <p className="mt-1 text-muted-foreground">Here's an overview of your account.</p>
         </div>
 
