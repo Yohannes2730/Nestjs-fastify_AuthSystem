@@ -1,14 +1,19 @@
-import { Schema } from '@nestjs/mongoose';
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
-@Schema()
+export type EmailOtpDocument = EmailOtp & Document;
+
+@Schema({ timestamps: true })
 export class EmailOtp {
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   email: string;
+
   @Prop({ required: true })
   otp: string;
+
   @Prop({ required: true })
   expiresAt: Date;
+
   @Prop({ default: false })
   verified: boolean;
 
@@ -21,4 +26,7 @@ export class EmailOtp {
   @Prop()
   lastResendAt: Date;
 }
+
 export const EmailOtpSchema = SchemaFactory.createForClass(EmailOtp);
+
+EmailOtpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
