@@ -43,7 +43,8 @@ export class UsersService {
     await this.emailService.sendOtp(normalizedEmail);
 
     return { message: 'Registration successful. OTP sent to email.' };
-  }
+  } 
+  
   // Login with attempt limitation
   async login(loginData: LoginDto) {
     const { email, password } = loginData;
