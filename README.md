@@ -1,8 +1,10 @@
 NestJS + Fastify + React Auth System
 
-A full-stack authentication system built with NestJS (Fastify) for the backend and React (Vite) for the frontend. It includes secure authentication, OTP verification, JWT login, and password reset functionality.
+A full-stack authentication system built with NestJS (Fastify) for the backend and React (Vite) for the frontend.
+It includes secure authentication, OTP verification, JWT login, and password reset functionality.
 
 * Features
+* 
 🔐 Authentication
 User registration with email OTP verification
 Secure login with JWT authentication
