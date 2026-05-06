@@ -53,7 +53,6 @@ const Register = () => {
         username: data.fullName, 
         email: data.email,
         password: data.password,
-        confirmPassword: data.confirmPassword,
       });
 
       setPendingEmail(data.email);

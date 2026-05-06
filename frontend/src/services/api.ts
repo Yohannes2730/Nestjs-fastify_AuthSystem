@@ -34,7 +34,7 @@ export interface User {
 }
 
 export const authApi = {
-  register: (data: { username: string; email: string; password: string; confirmPassword: string }) =>
+  register: (data: { username: string; email: string; password: string;}) =>
     api.post("users/register", data),
   login: (data: { email: string; password: string }) =>
     api.post("/auth/login", data),
