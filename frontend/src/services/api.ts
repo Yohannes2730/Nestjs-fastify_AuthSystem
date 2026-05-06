@@ -27,16 +27,15 @@ api.interceptors.response.use(
 );
 
 export interface User {
-  id?: string;
-  fullName?: string;
-  name?: string;
+  username: string;
   email: string;
-  role?: string;
+  isVerified: boolean;
+  createdAt: string;
 }
 
 export const authApi = {
-  register: (data: { fullName: string; email: string; password: string }) =>
-    api.post("/auth/register", data),
+  register: (data: { username: string; email: string; password: string }) =>
+    api.post("users/register", data),
   login: (data: { email: string; password: string }) =>
     api.post("/auth/login", data),
   verifyOtp: (data: { email: string; otp: string }) =>

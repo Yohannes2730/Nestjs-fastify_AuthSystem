@@ -20,30 +20,43 @@ export class UsersService {
 
   // Registration with OTP
   async register(registerData: RegisterDto) {
-    const { username, email, password } = registerData;
-    const normalizedEmail = email.trim().toLowerCase();
+  const { username, email, password ,confirmPassword} = registerData;
 
-    const userExist = await this.userModel.findOne({ email: normalizedEmail });
-    if (userExist) throw new BadRequestException('Email already exists');
+  // 🔥 ADD SAFETY CHECK (IMPORTANT)
+  if (!username || !email || !password || !confirmPassword) {
+    throw new BadRequestException('Missing required fields');
+  }
 
-    const user = await this.userModel.findOne({ username });
-    if (user) throw new BadRequestException('this username already exit');
+  if (password !== confirmPassword) {
+    throw new BadRequestException('Passwords do not match');
+  }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new this.userModel({
-      username,
-      email: normalizedEmail,
-      password: hashedPassword,
-      isVerified: false,
-      loginAttempts: 0,
-      blockedUntil: null,
-    });
-    await newUser.save();
+  const normalizedEmail = email.trim().toLowerCase();
 
-    await this.emailService.sendOtp(normalizedEmail);
+  const userExist = await this.userModel.findOne({ email: normalizedEmail });
+  if (userExist) throw new BadRequestException('Email already exists');
 
-    return { message: 'Registration successful. OTP sent to email.' };
-  } 
+  const usernameExist = await this.userModel.findOne({ username });
+  if (usernameExist)
+    throw new BadRequestException('Username already exists');
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const newUser = new this.userModel({
+    username,
+    email: normalizedEmail,
+    password: hashedPassword,
+    isVerified: false,
+    loginAttempts: 0,
+    blockedUntil: null,
+  });
+
+  await newUser.save();
+
+  await this.emailService.sendOtp(normalizedEmail);
+
+  return { message: 'Registration successful. OTP sent to email.' };
+}
   
   // Login with attempt limitation
   async login(loginData: LoginDto) {

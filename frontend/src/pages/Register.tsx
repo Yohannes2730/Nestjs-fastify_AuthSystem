@@ -50,15 +50,20 @@ const Register = () => {
     setLoading(true);
     try {
       await authApi.register({
-        fullName: data.fullName,
+        username: data.fullName, 
         email: data.email,
         password: data.password,
       });
+
       setPendingEmail(data.email);
       toast.success("Account created! Check your email for the OTP.");
       navigate("/verify-otp");
     } catch (err: any) {
-      const msg = err?.response?.data?.message || "Registration failed. Please try again.";
+      const msg =
+        err?.response?.data?.message instanceof Array
+          ? err.response.data.message[0]
+          : err?.response?.data?.message || "Registration failed. Please try again.";
+
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -68,6 +73,8 @@ const Register = () => {
   return (
     <AuthLayout title="Create your account" subtitle="Start your secure journey today">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        
+        {/* Full Name */}
         <div className="space-y-2">
           <Label htmlFor="fullName">Full Name</Label>
           <div className="relative">
@@ -77,6 +84,7 @@ const Register = () => {
           {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
         </div>
 
+        {/* Email */}
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
@@ -86,6 +94,7 @@ const Register = () => {
           {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
         </div>
 
+        {/* Password */}
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <div className="relative">
@@ -101,7 +110,6 @@ const Register = () => {
               type="button"
               onClick={() => setShowPwd((s) => !s)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label="Toggle password visibility"
             >
               {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -110,6 +118,7 @@ const Register = () => {
           {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
 
+        {/* Confirm Password */}
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Confirm Password</Label>
           <div className="relative">
@@ -127,10 +136,19 @@ const Register = () => {
           )}
         </div>
 
+        {/* Submit */}
         <Button type="submit" className="w-full shadow-elegant" disabled={loading}>
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Account"}
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Creating...
+            </span>
+          ) : (
+            "Create Account"
+          )}
         </Button>
 
+        {/* Footer */}
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link to="/login" className="font-medium text-primary hover:underline">

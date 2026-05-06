@@ -21,4 +21,6 @@ export class RegisterDto {
     },
   )
   password: string;
+  @IsString()
+  confirmPassword: string;
 }
