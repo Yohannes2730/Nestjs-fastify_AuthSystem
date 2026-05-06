@@ -20,15 +20,11 @@ export class UsersService {
 
   // Registration with OTP
   async register(registerData: RegisterDto) {
-  const { username, email, password ,confirmPassword} = registerData;
+  const { username, email, password } = registerData;
 
   // 🔥 ADD SAFETY CHECK (IMPORTANT)
-  if (!username || !email || !password || !confirmPassword) {
+  if (!username || !email || !password ) {
     throw new BadRequestException('Missing required fields');
-  }
-
-  if (password !== confirmPassword) {
-    throw new BadRequestException('Passwords do not match');
   }
 
   const normalizedEmail = email.trim().toLowerCase();
