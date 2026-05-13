@@ -22,7 +22,6 @@ export class UsersService {
   async register(registerData: RegisterDto) {
   const { username, email, password } = registerData;
 
-  // 🔥 ADD SAFETY CHECK (IMPORTANT)
   if (!username || !email || !password ) {
     throw new BadRequestException('Missing required fields');
   }

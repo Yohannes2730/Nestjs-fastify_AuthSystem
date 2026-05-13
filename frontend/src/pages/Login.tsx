@@ -120,7 +120,6 @@ const Login = () => {
             <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
           </div>
         </div>
-
         <div className="grid grid-cols-2 gap-3">
           <Button type="button" variant="outline" onClick={() => toast.info("Google login coming soon.")}>
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
